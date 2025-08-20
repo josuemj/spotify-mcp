@@ -55,14 +55,113 @@ def next_track():
             timeout=10
         )
         
-        if response.status_code == 200:
-            return f" Saltó a la siguiente canción en dispositivo {device_id}"
+        if response.status_code == 200:  # 204 es el código correcto
+            return f"Saltó a la siguiente canción en dispositivo {device_id}"
         elif response.status_code == 403:
             return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
         elif response.status_code == 404:
             return "Error: No hay dispositivos activos o no se encontró el dispositivo."
         else:
             return f"Error saltando canción: {response.status_code}"
+    except Exception as e:
+        return f"Error de conexión: {str(e)}"
+
+def previous_track():
+    """Ir a la canción anterior en el dispositivo activo"""
+    if not ACCESS_TOKEN:
+        return "Error: ACCESS_TOKEN no configurado en .env"
+    
+    try:
+        device_id = get_active_device()
+        if not device_id:
+            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+        
+        headers = {
+            'Authorization': f'Bearer {ACCESS_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Hacer request a previous track
+        response = requests.post(
+            f'https://api.spotify.com/v1/me/player/previous?device_id={device_id}', 
+            headers=headers, 
+            timeout=10
+        )
+        
+        if response.status_code == 204:  # 204 es el código correcto
+            return f"Fue a la canción anterior en dispositivo {device_id}"
+        elif response.status_code == 403:
+            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+        elif response.status_code == 404:
+            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+        else:
+            return f"Error yendo a canción anterior: {response.status_code}"
+    except Exception as e:
+        return f"Error de conexión: {str(e)}"
+
+def pause_track():
+    """Pausar la reproducción en el dispositivo activo"""
+    if not ACCESS_TOKEN:
+        return "Error: ACCESS_TOKEN no configurado en .env"
+    
+    try:
+        device_id = get_active_device()
+        if not device_id:
+            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+        
+        headers = {
+            'Authorization': f'Bearer {ACCESS_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Hacer request a pause
+        response = requests.put(
+            f'https://api.spotify.com/v1/me/player/pause?device_id={device_id}', 
+            headers=headers, 
+            timeout=10
+        )
+        
+        if response.status_code == 204:  # 204 es el código correcto
+            return f"Pausó la reproducción en dispositivo {device_id}"
+        elif response.status_code == 403:
+            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+        elif response.status_code == 404:
+            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+        else:
+            return f"Error pausando reproducción: {response.status_code}"
+    except Exception as e:
+        return f"Error de conexión: {str(e)}"
+
+def resume_track():
+    """Reanudar la reproducción en el dispositivo activo"""
+    if not ACCESS_TOKEN:
+        return "Error: ACCESS_TOKEN no configurado en .env"
+    
+    try:
+        device_id = get_active_device()
+        if not device_id:
+            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+        
+        headers = {
+            'Authorization': f'Bearer {ACCESS_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Hacer request a play/resume
+        response = requests.put(
+            f'https://api.spotify.com/v1/me/player/play?device_id={device_id}', 
+            headers=headers, 
+            timeout=10
+        )
+        
+        if response.status_code == 204:  # 204 es el código correcto
+            return f"Reanudó la reproducción en dispositivo {device_id}"
+        elif response.status_code == 403:
+            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+        elif response.status_code == 404:
+            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+        else:
+            return f"Error reanudando reproducción: {response.status_code}"
     except Exception as e:
         return f"Error de conexión: {str(e)}"
 
@@ -80,6 +179,33 @@ async def list_tools() -> list[Tool]:
                 "properties": {},
                 "required": []
             }
+        ),
+        Tool(
+            name="previous_track",
+            description="Go to previous track on active Spotify device",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        ),
+        Tool(
+            name="pause_track",
+            description="Pause playback on active Spotify device",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        ),
+        Tool(
+            name="resume_track",
+            description="Resume/play playback on active Spotify device",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
         )
     ]
 
@@ -87,6 +213,15 @@ async def list_tools() -> list[Tool]:
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     if name == "next_track":
         result = next_track()
+        return [TextContent(type="text", text=result)]
+    elif name == "previous_track":
+        result = previous_track()
+        return [TextContent(type="text", text=result)]
+    elif name == "pause_track":
+        result = pause_track()
+        return [TextContent(type="text", text=result)]
+    elif name == "resume_track":
+        result = resume_track()
         return [TextContent(type="text", text=result)]
     else:
         raise ValueError(f"Unknown tool: {name}")
