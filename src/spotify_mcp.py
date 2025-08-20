@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
+import json
 
 load_dotenv()
 
@@ -36,12 +37,12 @@ def get_active_device():
 def next_track():
     """Saltar a la siguiente canción en el dispositivo activo"""
     if not ACCESS_TOKEN:
-        return "Error: ACCESS_TOKEN no configurado en .env"
+        return {"success": False, "error": "ACCESS_TOKEN no configurado en .env"}
     
     try:
         device_id = get_active_device()
         if not device_id:
-            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+            return {"success": False, "error": "No hay dispositivo activo encontrado"}
         
         headers = {
             'Authorization': f'Bearer {ACCESS_TOKEN}',
@@ -55,26 +56,26 @@ def next_track():
             timeout=10
         )
         
-        if response.status_code == 200:  # 204 es el código correcto
-            return f"Saltó a la siguiente canción en dispositivo {device_id}"
+        if response.status_code == 204:  # 204 es el código correcto
+            return {"success": True, "action": "next_track", "device_id": device_id}
         elif response.status_code == 403:
-            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+            return {"success": False, "error": "Token expirado o permisos insuficientes"}
         elif response.status_code == 404:
-            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+            return {"success": False, "error": "No hay dispositivos activos"}
         else:
-            return f"Error saltando canción: {response.status_code}"
+            return {"success": False, "error": f"HTTP {response.status_code}"}
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
+        return {"success": False, "error": f"Error de conexión: {str(e)}"}
 
 def previous_track():
     """Ir a la canción anterior en el dispositivo activo"""
     if not ACCESS_TOKEN:
-        return "Error: ACCESS_TOKEN no configurado en .env"
+        return {"success": False, "error": "ACCESS_TOKEN no configurado en .env"}
     
     try:
         device_id = get_active_device()
         if not device_id:
-            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+            return {"success": False, "error": "No hay dispositivo activo encontrado"}
         
         headers = {
             'Authorization': f'Bearer {ACCESS_TOKEN}',
@@ -89,25 +90,25 @@ def previous_track():
         )
         
         if response.status_code == 204:  # 204 es el código correcto
-            return f"Fue a la canción anterior en dispositivo {device_id}"
+            return {"success": True, "action": "previous_track", "device_id": device_id}
         elif response.status_code == 403:
-            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+            return {"success": False, "error": "Token expirado o permisos insuficientes"}
         elif response.status_code == 404:
-            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+            return {"success": False, "error": "No hay dispositivos activos"}
         else:
-            return f"Error yendo a canción anterior: {response.status_code}"
+            return {"success": False, "error": f"HTTP {response.status_code}"}
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
+        return {"success": False, "error": f"Error de conexión: {str(e)}"}
 
 def pause_track():
     """Pausar la reproducción en el dispositivo activo"""
     if not ACCESS_TOKEN:
-        return "Error: ACCESS_TOKEN no configurado en .env"
+        return {"success": False, "error": "ACCESS_TOKEN no configurado en .env"}
     
     try:
         device_id = get_active_device()
         if not device_id:
-            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+            return {"success": False, "error": "No hay dispositivo activo encontrado"}
         
         headers = {
             'Authorization': f'Bearer {ACCESS_TOKEN}',
@@ -122,25 +123,25 @@ def pause_track():
         )
         
         if response.status_code == 204:  # 204 es el código correcto
-            return f"Pausó la reproducción en dispositivo {device_id}"
+            return {"success": True, "action": "pause", "device_id": device_id}
         elif response.status_code == 403:
-            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+            return {"success": False, "error": "Token expirado o permisos insuficientes"}
         elif response.status_code == 404:
-            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+            return {"success": False, "error": "No hay dispositivos activos"}
         else:
-            return f"Error pausando reproducción: {response.status_code}"
+            return {"success": False, "error": f"HTTP {response.status_code}"}
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
+        return {"success": False, "error": f"Error de conexión: {str(e)}"}
 
 def resume_track():
     """Reanudar la reproducción en el dispositivo activo"""
     if not ACCESS_TOKEN:
-        return "Error: ACCESS_TOKEN no configurado en .env"
+        return {"success": False, "error": "ACCESS_TOKEN no configurado en .env"}
     
     try:
         device_id = get_active_device()
         if not device_id:
-            return "No hay dispositivo activo encontrado. Asegúrate de que Spotify esté reproduciéndose."
+            return {"success": False, "error": "No hay dispositivo activo encontrado"}
         
         headers = {
             'Authorization': f'Bearer {ACCESS_TOKEN}',
@@ -155,15 +156,15 @@ def resume_track():
         )
         
         if response.status_code == 204:  # 204 es el código correcto
-            return f"Reanudó la reproducción en dispositivo {device_id}"
+            return {"success": True, "action": "resume", "device_id": device_id}
         elif response.status_code == 403:
-            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+            return {"success": False, "error": "Token expirado o permisos insuficientes"}
         elif response.status_code == 404:
-            return "Error: No hay dispositivos activos o no se encontró el dispositivo."
+            return {"success": False, "error": "No hay dispositivos activos"}
         else:
-            return f"Error reanudando reproducción: {response.status_code}"
+            return {"success": False, "error": f"HTTP {response.status_code}"}
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
+        return {"success": False, "error": f"Error de conexión: {str(e)}"}
 
 def current_track():
     """Obtener información de la canción que se está reproduciendo actualmente"""
@@ -218,7 +219,7 @@ def current_track():
 def search_and_play(query):
     """Buscar una canción y reproducirla automáticamente"""
     if not ACCESS_TOKEN:
-        return "Error: ACCESS_TOKEN no configurado en .env"
+        return {"success": False, "error": "ACCESS_TOKEN no configurado en .env"}
     
     try:
         headers = {
@@ -242,13 +243,13 @@ def search_and_play(query):
         )
         
         if search_response.status_code != 200:
-            return f"Error en búsqueda: {search_response.status_code}"
+            return {"success": False, "error": f"Error en búsqueda: HTTP {search_response.status_code}"}
         
         search_data = search_response.json()
         tracks = search_data.get('tracks', {}).get('items', [])
         
         if not tracks:
-            return f"No se encontraron resultados para: '{query}'"
+            return {"success": False, "error": f"No se encontraron resultados para: '{query}'"}
         
         # Obtener información de la primera canción encontrada
         track = tracks[0]
@@ -260,7 +261,15 @@ def search_and_play(query):
         # Paso 2: Obtener dispositivo activo
         device_id = get_active_device()
         if not device_id:
-            return f"🎵 Encontré: '{track_name}' por {artists}\n Pero no hay dispositivo activo. Abre Spotify en algún dispositivo."
+            return {
+                "success": False, 
+                "error": "No hay dispositivo activo",
+                "found_track": {
+                    "name": track_name,
+                    "artist": artists,
+                    "album": album_name
+                }
+            }
         
         # Paso 3: Reproducir la canción
         play_data = {
@@ -276,20 +285,50 @@ def search_and_play(query):
         )
         
         if play_response.status_code == 204:
-            return f"""🎵 **Reproduciendo ahora:**
-                ` **{track_name}**
-                 Artista: {artists}
-                 Álbum: {album_name}
-                 Dispositivo: {device_id}"""
+            return {
+                "success": True,
+                "action": "search_and_play",
+                "track": {
+                    "name": track_name,
+                    "artist": artists,
+                    "album": album_name,
+                    "uri": track_uri
+                },
+                "device_id": device_id
+            }
         elif play_response.status_code == 403:
-            return f" Encontré: '{track_name}' por {artists}\n Error: Token expirado o permisos insuficientes."
+            return {
+                "success": False, 
+                "error": "Token expirado o permisos insuficientes",
+                "found_track": {
+                    "name": track_name,
+                    "artist": artists,
+                    "album": album_name
+                }
+            }
         elif play_response.status_code == 404:
-            return f" Encontré: '{track_name}' por {artists}\n Error: Dispositivo no encontrado."
+            return {
+                "success": False, 
+                "error": "Dispositivo no encontrado",
+                "found_track": {
+                    "name": track_name,
+                    "artist": artists,
+                    "album": album_name
+                }
+            }
         else:
-            return f" Encontré: '{track_name}' por {artists}\n Error reproduciendo: {play_response.status_code}"
+            return {
+                "success": False, 
+                "error": f"Error reproduciendo: HTTP {play_response.status_code}",
+                "found_track": {
+                    "name": track_name,
+                    "artist": artists,
+                    "album": album_name
+                }
+            }
 
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
+        return {"success": False, "error": f"Error de conexión: {str(e)}"}
 
 # MCP Server Implementation
 server = Server("spotify-mcp")
@@ -360,38 +399,32 @@ async def list_tools() -> list[Tool]:
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    
     if name == "next_track":
         result = next_track()
-        return [TextContent(type="text", text=result)]
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     elif name == "previous_track":
         result = previous_track()
-        return [TextContent(type="text", text=result)]
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     elif name == "pause_track":
         result = pause_track()
-        return [TextContent(type="text", text=result)]
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     elif name == "resume_track":
         result = resume_track()
-        return [TextContent(type="text", text=result)]
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     elif name == "current_track":
         result = current_track()
-        if isinstance(result, dict):
-            # Formatear el diccionario como texto legible
-            formatted_result = f""" **{result['track']}**
-                             Artista: {result['artist']}
-                             Álbum: {result['album']}
-                            {'▶' if result['status'] == 'Reproduciendo' else '⏸'} Estado: {result['status']}
-                             Duración: {result['duration']}"""
-            return [TextContent(type="text", text=formatted_result)]
-        else:
-            return [TextContent(type="text", text=str(result))]
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     elif name == "search_and_play":
         query = arguments.get("query", "")
         if not query:
-            return [TextContent(type="text", text="Error: Se requiere un término de búsqueda")]
+            error_result = {"success": False, "error": "Se requiere un término de búsqueda"}
+            return [TextContent(type="text", text=json.dumps(error_result, ensure_ascii=False, indent=2))]
         result = search_and_play(query)
-        return [TextContent(type="text", text=result)]
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     else:
-        raise ValueError(f"Unknown tool: {name}")
+        error_result = {"success": False, "error": f"Herramienta desconocida: {name}"}
+        return [TextContent(type="text", text=json.dumps(error_result, ensure_ascii=False, indent=2))]
 
 async def main():
     async with stdio_server() as (read_stream, write_stream):
