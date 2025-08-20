@@ -215,6 +215,82 @@ def current_track():
     except Exception as e:
         return f"Error de conexión: {str(e)}"
 
+def search_and_play(query):
+    """Buscar una canción y reproducirla automáticamente"""
+    if not ACCESS_TOKEN:
+        return "Error: ACCESS_TOKEN no configurado en .env"
+    
+    try:
+        headers = {
+            'Authorization': f'Bearer {ACCESS_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Paso 1: Buscar la canción
+        search_params = {
+            'q': query,
+            'type': 'track',
+            'limit': 1,  # Solo necesitamos el primer resultado
+            'market': 'ES'
+        }
+        
+        search_response = requests.get(
+            'https://api.spotify.com/v1/search',
+            headers=headers,
+            params=search_params,
+            timeout=10
+        )
+        
+        if search_response.status_code != 200:
+            return f"Error en búsqueda: {search_response.status_code}"
+        
+        search_data = search_response.json()
+        tracks = search_data.get('tracks', {}).get('items', [])
+        
+        if not tracks:
+            return f"No se encontraron resultados para: '{query}'"
+        
+        # Obtener información de la primera canción encontrada
+        track = tracks[0]
+        track_uri = track['uri']
+        track_name = track['name']
+        artists = ', '.join([artist['name'] for artist in track['artists']])
+        album_name = track['album']['name']
+        
+        # Paso 2: Obtener dispositivo activo
+        device_id = get_active_device()
+        if not device_id:
+            return f"🎵 Encontré: '{track_name}' por {artists}\n Pero no hay dispositivo activo. Abre Spotify en algún dispositivo."
+        
+        # Paso 3: Reproducir la canción
+        play_data = {
+            'uris': [track_uri],
+            'position_ms': 0
+        }
+        
+        play_response = requests.put(
+            f'https://api.spotify.com/v1/me/player/play?device_id={device_id}',
+            headers=headers,
+            json=play_data,
+            timeout=10
+        )
+        
+        if play_response.status_code == 204:
+            return f"""🎵 **Reproduciendo ahora:**
+                ` **{track_name}**
+                 Artista: {artists}
+                 Álbum: {album_name}
+                 Dispositivo: {device_id}"""
+        elif play_response.status_code == 403:
+            return f" Encontré: '{track_name}' por {artists}\n Error: Token expirado o permisos insuficientes."
+        elif play_response.status_code == 404:
+            return f" Encontré: '{track_name}' por {artists}\n Error: Dispositivo no encontrado."
+        else:
+            return f" Encontré: '{track_name}' por {artists}\n Error reproduciendo: {play_response.status_code}"
+
+    except Exception as e:
+        return f"Error de conexión: {str(e)}"
+
 # MCP Server Implementation
 server = Server("spotify-mcp")
 
@@ -265,6 +341,20 @@ async def list_tools() -> list[Tool]:
                 "properties": {},
                 "required": []
             }
+        ),
+        Tool(
+            name="search_and_play",
+            description="Search for a song on Spotify and play it immediately",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query for the song (artist, song name, album, etc.)"
+                    }
+                },
+                "required": ["query"]
+            }
         )
     ]
 
@@ -284,6 +374,21 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=result)]
     elif name == "current_track":
         result = current_track()
+        if isinstance(result, dict):
+            # Formatear el diccionario como texto legible
+            formatted_result = f""" **{result['track']}**
+                             Artista: {result['artist']}
+                             Álbum: {result['album']}
+                            {'▶' if result['status'] == 'Reproduciendo' else '⏸'} Estado: {result['status']}
+                             Duración: {result['duration']}"""
+            return [TextContent(type="text", text=formatted_result)]
+        else:
+            return [TextContent(type="text", text=str(result))]
+    elif name == "search_and_play":
+        query = arguments.get("query", "")
+        if not query:
+            return [TextContent(type="text", text="Error: Se requiere un término de búsqueda")]
+        result = search_and_play(query)
         return [TextContent(type="text", text=result)]
     else:
         raise ValueError(f"Unknown tool: {name}")

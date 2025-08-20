@@ -125,7 +125,7 @@ def authorize_spotify():
             with open(env_path, 'w', encoding='utf-8') as f:
                 f.writelines(env_lines)
             
-            print("✅ ACCESS_TOKEN guardado en .env")
+            print("ACCESS_TOKEN guardado en .env")
             
             return token_data
         else:
