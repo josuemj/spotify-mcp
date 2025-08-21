@@ -56,7 +56,7 @@ def next_track():
             timeout=10
         )
         
-        if response.status_code == 204:  # 204 es el código correcto
+        if response.status_code == 200:  # 200 es el código correcto
             return {"success": True, "action": "next_track", "device_id": device_id}
         elif response.status_code == 403:
             return {"success": False, "error": "Token expirado o permisos insuficientes"}
@@ -169,52 +169,64 @@ def resume_track():
 def current_track():
     """Obtener información de la canción que se está reproduciendo actualmente"""
     if not ACCESS_TOKEN:
-        return "Error: ACCESS_TOKEN no configurado en .env"
-    
+        return {"success": False, "error": "ACCESS_TOKEN no configurado en .env"}
     try:
         headers = {
             'Authorization': f'Bearer {ACCESS_TOKEN}',
             'Content-Type': 'application/json'
         }
-        
-        # Hacer request a currently-playing
         response = requests.get(
-            'https://api.spotify.com/v1/me/player/currently-playing', 
-            headers=headers, 
+            'https://api.spotify.com/v1/me/player/currently-playing',
+            headers=headers,
             timeout=10
         )
-        
         if response.status_code == 200:
             data = response.json()
-            
-            if data and 'item' in data:
+            if data and 'item' in data and data['item']:
                 track = data['item']
                 artists = ', '.join([artist['name'] for artist in track['artists']])
                 track_name = track['name']
                 album_name = track['album']['name']
                 is_playing = data.get('is_playing', False)
                 duration_ms = track.get('duration_ms', 0)
-
                 return {
+                    "success": True,
                     "track": track_name,
                     "artist": artists,
                     "album": album_name,
                     "status": "Reproduciendo" if is_playing else "Pausado",
-                    "duration" : f"{duration_ms // 60000}:{(duration_ms % 60000) // 1000:02d}"
+                    "duration": f"{duration_ms // 60000}:{(duration_ms % 60000) // 1000:02d}"
                 }
             else:
-                return "No hay ninguna canción reproduciéndose actualmente"
-                
+                return {
+                    "success": False,
+                    "error": "No hay ninguna canción reproduciéndose actualmente"
+                }
         elif response.status_code == 204:
-            return "No hay ninguna canción reproduciéndose actualmente"
+            return {
+                "success": False,
+                "error": "No hay ninguna canción reproduciéndose actualmente"
+            }
         elif response.status_code == 403:
-            return "Error: Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+            return {
+                "success": False,
+                "error": "Token expirado o permisos insuficientes. Ejecuta spotify_auth.py de nuevo."
+            }
         elif response.status_code == 404:
-            return "Error: No hay dispositivos activos."
+            return {
+                "success": False,
+                "error": "No hay dispositivos activos."
+            }
         else:
-            return f"Error obteniendo canción actual: {response.status_code}"
+            return {
+                "success": False,
+                "error": f"Error obteniendo canción actual: {response.status_code}"
+            }
     except Exception as e:
-        return f"Error de conexión: {str(e)}"
+        return {
+            "success": False,
+            "error": f"Error de conexión: {str(e)}"
+        }
 
 def search_and_play(query):
     """Buscar una canción y reproducirla automáticamente"""
