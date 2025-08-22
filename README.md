@@ -9,3 +9,9 @@
 6. Abrir dispositivo con spotify
 7. Pedir al llm algunas de las acciones
     - Reproducir algo de David Guetta (ejemplo)
+
+Run spotify_auth.mcp to get the auth toke
+- It will open on browser spotify and click accept
+- The will redirect to https://github.com/josuemj/mcp-llm-client?code=XXX
+- Copy entire link into console
+- Will save the toke into .env it expires in 1hr
