@@ -87,21 +87,53 @@ This will:
 python src/spotify_mcp.py
 ```
 
-### 6. Usage with AI Assistan
+### 6. Usage with AI Assistant
 
-The server implements the Model Context Protocol (MCP) standard, providing 6 tools:
+**Claude Desktop Integration**
 
-1. `search_and_play` - Search for and play music
-2. `current_track` - Get current track information
-3. `next_track` - Skip to next song
-4. `previous_track` - Go to previous song
-5. `pause_track` - Pause playback
-6. `resume_track` - Resume/start playback
+Once you have everything set up, configure Claude Desktop to use your Spotify MCP server:
 
-All tools automatically:
-- Detect your active Spotify device
-- Handle authentication and API errors
-- Return structured responses with success status and error messages
+
+1. Locate Claude Desktop config file:
+```bash
+Windows: %APPDATA%\Claude\claude_desktop_config.json
+macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+Linux: ~/.config/Claude/claude_desktop_config.json
+```
+2. Add the MCP server configuration:
+```json
+"mcpServers": {
+    "spotify-mcp": {
+      "command": "C:/Users/Someone/Mcps/spotify-mcp/.venv/Scripts/python.exe",
+      "args": [
+        "C:/Users/Someone/Mcps/spotify-mcp/src/spotify_mcp.py"
+      ]
+    },
+    // other mcps
+  },
+```
+
+3. Update paths for your system:
+
+*Windows example*: "C:/Users/YourName/Projects/spotify-mcp/.venv/Scripts/python.exe"
+*macOS/Linux example*: "/Users/YourName/Projects/spotify-mcp/.venv/bin/python"
+
+4. Restart Claude Desktop to load the new MCP server
+
+Once configured, you can control Spotify through natural language in Claude:
+
+- "Play some music by The Beatles"
+- "Skip to the next song"
+- "What song is currently playing?"
+- "Pause the music"
+- "Play Bohemian Rhapsody"
+
+Important Notes:
+
+- Environment variables (.env file) are automatically loaded by the MCP server
+- No additional environment configuration needed in Claude Desktop config
+- Ensure Spotify is open and active on at least one device before using commands
+- The MCP server will automatically handle device detection and API authentication
 
 ## Troubleshooting
 
