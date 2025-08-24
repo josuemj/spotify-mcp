@@ -41,8 +41,15 @@ This MCP server provides AI assistants with the following Spotify control capabi
 ### 1. Create Spotify App
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new app
-3. Note your `Client ID` and `Client Secret`
-4. Add `https://github.com/josuemj/spotify-mcp` as a redirect URI
+   - **App name** --> my-spotify-mcp
+   - **Description** --> my first mcp with spotify (whatever, irrelevant)
+   - **Website** --> Leave empty
+   - **Redirect URIs** (**This is crucial**) --> https://github.com/josuemj/spotify-mcp 
+   - **Which API/SDKs are you planning to use?** --> Select **Web API**
+   - **Click Save**
+     
+4. Note your `Client ID` and `Client Secret`
+5. Add `https://github.com/josuemj/spotify-mcp` as a redirect URI
 
 ### 2. Clone the mcp locally
 ```bash
