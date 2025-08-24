@@ -1,17 +1,100 @@
-- Es indispenable tener premium
+# Spotify MCP Server
 
-1. Crear app (poner link)
-    Hacer referncia a este repo jajaja
-2. Crear .env con SPOTIFY_CLIENT_ID y SPOTIFY_CLIENT_SECRET
-3. Correr el spotify_auth
-4. Copiar el link del navegador en la consola
-5. correr el sportif_mcp .py
-6. Abrir dispositivo con spotify
-7. Pedir al llm algunas de las acciones
-    - Reproducir algo de David Guetta (ejemplo)
+A Model Context Protocol (MCP) server that enables AI assistants to control Spotify playback through natural language commands.
 
-Run spotify_auth.mcp to get the auth toke
-- It will open on browser spotify and click accept
-- The will redirect to https://github.com/josuemj/mcp-llm-client?code=XXX
-- Copy entire link into console
-- Will save the toke into .env it expires in 1hr
+## Features
+
+This MCP server provides AI assistants with the following Spotify control capabilities:
+
+### 🔍 Music Discovery
+- **Search and Play**: Find and immediately play any song by searching for artist, song name, album, or any combination
+  - Example: "Play some David Guetta"
+  - Example: "Play Bohemian Rhapsody by Queen"
+
+![Search and play sample](img/image.png)
+
+### 🎵 Playback Controls
+- **Play/Resume**: Resume paused music on your active device
+- **Pause**: Pause the currently playing track
+- **Next Track**: Skip to the next song in your queue
+- **Previous Track**: Go back to the previous song
+
+
+### ℹ️ Track Information
+- **Current Track**: Get detailed information about what's currently playing, including:
+  - Song title and artist
+  - Album name
+  - Playback status (playing/paused)
+  - Track duration
+
+![Current track sample](img/image-1.png)
+
+
+## Requirements
+
+- **Spotify Premium account** (required for playback control via API)
+- Python 3.x
+- Active Spotify device (mobile app, desktop app, or web player)
+
+## Setup
+
+### 1. Create Spotify App
+1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Create a new app
+3. Note your `Client ID` and `Client Secret`
+4. Add `https://github.com/josuemj/spotify-mcp` as a redirect URI
+
+### 2. Clone the mcp locally
+```bash
+git clone https://github.com/josuemj/spotify-mcp
+cd spotify-mcp
+pip install -r requirements.txt
+```
+
+### 3. Environment Configuration
+Create a `.env` file in the project root:
+```env
+SPOTIFY_CLIENT_ID=your_client_id_here
+SPOTIFY_CLIENT_SECRET=your_client_secret_here
+```
+
+### 4. Authentication
+Run the authentication script:
+```bash
+python src/spotify_auth.py
+```
+
+This will:
+- Open your browser for Spotify OAuth
+- Redirect you to GitHub with an authorization code
+- Prompt you to paste the full redirect URL
+- Automatically save your access token to `.env`
+
+**Note**: Access tokens expire after 1 hour. Re-run authentication when needed.
+
+### 5. Start the MCP Server
+```bash
+python src/spotify_mcp.py
+```
+
+### 6. Usage with AI Assistan
+
+The server implements the Model Context Protocol (MCP) standard, providing 6 tools:
+
+1. `search_and_play` - Search for and play music
+2. `current_track` - Get current track information
+3. `next_track` - Skip to next song
+4. `previous_track` - Go to previous song
+5. `pause_track` - Pause playback
+6. `resume_track` - Resume/start playback
+
+All tools automatically:
+- Detect your active Spotify device
+- Handle authentication and API errors
+- Return structured responses with success status and error messages
+
+## Troubleshooting
+
+- **"No active device"**: Make sure you have Spotify open on at least one device
+- **"Token expired"**: Re-run `python src/spotify_auth.py` to refresh your token
+- **"Premium required"**: This server requires a Spotify Premium subscription for playback control
