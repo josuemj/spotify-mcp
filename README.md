@@ -11,7 +11,7 @@ This MCP server provides AI assistants with the following Spotify control capabi
   - Example: "Play some David Guetta"
   - Example: "Play Bohemian Rhapsody by Queen"
 
-![Search and play sample](img/image.png)
+![Search and play sample](img/search_and_play_sample.png)
 
 ### 🎵 Playback Controls
 - **Play/Resume**: Resume paused music on your active device
