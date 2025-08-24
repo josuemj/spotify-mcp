@@ -9,7 +9,7 @@ load_dotenv()
 
 CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-REDIRECT_URI = 'https://github.com/josuemj/mcp-llm-client'
+REDIRECT_URI = 'https://github.com/josuemj/spotify-mcp'
 SCOPE = 'user-read-playback-state user-modify-playback-state'
 
 def get_authorization_url():
