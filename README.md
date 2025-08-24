@@ -48,6 +48,11 @@ This MCP server provides AI assistants with the following Spotify control capabi
 ```bash
 git clone https://github.com/josuemj/spotify-mcp
 cd spotify-mcp
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Linux/Mac
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
