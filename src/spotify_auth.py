@@ -10,7 +10,7 @@ load_dotenv()
 CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 REDIRECT_URI = 'https://github.com/josuemj/spotify-mcp'
-SCOPE = 'user-read-playback-state user-modify-playback-state'
+SCOPE = 'user-read-playback-state user-modify-playback-state user-read-currently-playing user-top-read user-library-read playlist-modify-public playlist-modify-private'
 
 def get_authorization_url():
     """Genera la URL de autorización de Spotify"""
