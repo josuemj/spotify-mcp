@@ -860,6 +860,29 @@ async def list_tools() -> list[Tool]:
                 "required": []
             }
         ),
+        Tool(
+            name="play_top_track",
+            description="Play a random song from your top tracks on Spotify",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "time_range": {
+                        "type": "string",
+                        "description": "Time period for top tracks",
+                        "enum": ["short_term", "medium_term", "long_term"],
+                        "default": "medium_term"
+                    },
+                    "limit": {
+                        "type": "integer", 
+                        "description": "Number of top tracks to choose from (1-50)",
+                        "minimum": 1,
+                        "maximum": 50,
+                        "default": 20
+                    }
+                },
+                "required": []
+            }
+        ),
 
     ]
 
@@ -902,6 +925,22 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return [TextContent(type="text", text=json.dumps(error_result, ensure_ascii=False, indent=2))]
             
         result = get_top_tracks(time_range, limit)
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
+    elif name == "play_top_track":
+        time_range = arguments.get("time_range", "medium_term")
+        limit = arguments.get("limit", 20)
+        
+        # Validar time_range
+        if time_range not in ["short_term", "medium_term", "long_term"]:
+            error_result = {"success": False, "error": "time_range debe ser: short_term, medium_term, o long_term"}
+            return [TextContent(type="text", text=json.dumps(error_result, ensure_ascii=False, indent=2))]
+        
+        # Validar limit
+        if not (1 <= limit <= 50):
+            error_result = {"success": False, "error": "limit debe estar entre 1 y 50"}
+            return [TextContent(type="text", text=json.dumps(error_result, ensure_ascii=False, indent=2))]
+            
+        result = play_top_track(time_range, limit)
         return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
     else:
         error_result = {"success": False, "error": f"Herramienta desconocida: {name}"}
